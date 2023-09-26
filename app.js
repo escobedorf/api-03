@@ -1,14 +1,15 @@
-const express = require('express');
-const app = express();
-const puerto = process.env.PORT || 3000;
-app.use(express.json());
+// Importación de módulos
+const express = require('express'); // Importa el módulo Express.js
+const app = express(); // Crea una instancia de la aplicación Express
+const puerto = process.env.PORT || 3000; // Define el puerto en el que el servidor escuchará las solicitudes entrantes (toma el valor del entorno o usa el puerto 3000 por defecto)
+app.use(express.json()); // Configura el middleware para el manejo de solicitudes JSON
 
 // Base de datos ficticia de productos
 let productos = [
     { id: 1, nombre: "Laptop HP", descripcion: "Una potente laptop HP con procesador Intel Core i7 y pantalla de 15 pulgadas.", precio: 799.99 },
     { id: 2, nombre: "Samsung Galaxy S21", descripcion: "El último smartphone de Samsung con cámara de alta resolución y pantalla OLED de 6.2 pulgadas.", precio: 999.99 },
     { id: 3, nombre: "Televisor LG", descripcion: "Un televisor LG de 55 pulgadas con resolución 4K para una experiencia de visualización impresionante.", precio: 699.99 },
-    { id: 4, nombre: "Tenis Nike Air Max", descripcion: "Zapatillas Nike Air Max con amortiguación de aire para una comodidad excepcional durante el ejercicio.", precio: 129.99 },
+    { id: 4, nombre: "Tenis Nike Air Max", descripcion: "Nike Air Max con amortiguación de aire para una comodidad excepcional durante el ejercicio.", precio: 129.99 },
     { id: 5, nombre: "Bicicleta de montaña", descripcion: "Una bicicleta de montaña Trek con cuadro de aluminio y suspensiones delanteras para un ciclismo aventurero.", precio: 599.99 },
     { id: 6, nombre: "Cámara Canon", descripcion: "Una cámara DSLR Canon con sensor APS-C de 24.1 megapíxeles para fotografías de alta calidad.", precio: 499.99 },
     { id: 7, nombre: "Aspiradora Dyson", descripcion: "Una aspiradora inalámbrica Dyson con potente succión y filtro avanzado para una limpieza eficiente.", precio: 399.99 },
@@ -18,6 +19,8 @@ let productos = [
 ];
 
 // Rutas para manipular productos
+
+// Ruta para obtener todos los productos
 app.get('/socios/v1/productos', (req, res) => {
     if (productos.length > 0) {
         res.status(200).json({
@@ -34,9 +37,10 @@ app.get('/socios/v1/productos', (req, res) => {
     }
 });
 
+// Ruta para obtener un producto por ID
 app.get('/socios/v1/productos/:id', (req, res) => {
-    const productId = req.params.id;
-    const productoEncontrado = productos.find(producto => producto.id == productId);
+    const productId = req.params.id; // Obtiene el parámetro de ID de la URL
+    const productoEncontrado = productos.find(producto => producto.id == productId); // Busca el producto por ID en la base de datos
     if (productoEncontrado) {
         res.status(200).json({
             estado: 1,
@@ -52,18 +56,19 @@ app.get('/socios/v1/productos/:id', (req, res) => {
     }
 });
 
+// Ruta para crear un nuevo producto
 app.post('/socios/v1/productos', (req, res) => {
-    const { nombre, descripcion, precio } = req.body;
-    const id = Math.round(Math.random() * 1000);
+    const { nombre, descripcion, precio } = req.body; // Obtiene los datos del producto del cuerpo de la solicitud
+    const id = Math.round(Math.random() * 1000); // Genera un ID aleatorio
     if (nombre == undefined || descripcion == undefined || precio == undefined) {
         res.status(400).json({
             estado: 0,
             mensaje: "Faltan parametros en la solicitud"
         });
     } else {
-        const producto = { id: id, nombre: nombre, descripcion: descripcion, precio: precio };
+        const producto = { id: id, nombre: nombre, descripcion: descripcion, precio: precio }; // Crea el objeto de producto
         const longitudInicial = productos.length;
-        productos.push(producto);
+        productos.push(producto); // Agrega el producto a la base de datos
         if (productos.length > longitudInicial) {
             res.status(201).json({
                 estado: 1,
@@ -79,18 +84,19 @@ app.post('/socios/v1/productos', (req, res) => {
     }
 });
 
+// Ruta para actualizar un producto por ID
 app.put('/socios/v1/productos/:id', (req, res) => {
-    const { id } = req.params;
-    const { nombre, descripcion, precio } = req.body;
+    const { id } = req.params; // Obtiene el parámetro de ID de la URL
+    const { nombre, descripcion, precio } = req.body; // Obtiene los datos actualizados del producto del cuerpo de la solicitud
     if (nombre == undefined || descripcion == undefined || precio == undefined) {
         res.status(400).json({
             estado: 0,
             mensaje: "Faltan parametros en la solicitud"
         });
     } else {
-        const posActualizar = productos.findIndex(producto => producto.id == id);
+        const posActualizar = productos.findIndex(producto => producto.id == id); // Busca la posición del producto por ID en la base de datos
         if (posActualizar != -1) {
-            productos[posActualizar].nombre = nombre;
+            productos[posActualizar].nombre = nombre; // Actualiza los datos del producto
             productos[posActualizar].descripcion = descripcion;
             productos[posActualizar].precio = precio;
             res.status(200).json({
@@ -107,11 +113,12 @@ app.put('/socios/v1/productos/:id', (req, res) => {
     }
 });
 
+// Ruta para eliminar un producto por ID
 app.delete('/socios/v1/productos/:id', (req, res) => {
-    const { id } = req.params;
-    const indiceEliminar = productos.findIndex(producto => producto.id == id);
+    const { id } = req.params; // Obtiene el parámetro de ID de la URL
+    const indiceEliminar = productos.findIndex(producto => producto.id == id); // Busca la posición del producto por ID en la base de datos
     if (indiceEliminar != -1) {
-        productos.splice(indiceEliminar, 1);
+        productos.splice(indiceEliminar, 1); // Elimina el producto de la base de datos
         res.status(201).json({
             estado: 1,
             mensaje: "Producto eliminado con éxito"
@@ -124,6 +131,9 @@ app.delete('/socios/v1/productos/:id', (req, res) => {
     }
 });
 
+// Inicia el servidor y escucha en el puerto especificado
 app.listen(puerto, () => {
     console.log('Servidor corriendo en el puerto:', puerto);
 });
+
+
